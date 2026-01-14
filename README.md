@@ -6,6 +6,8 @@
 
 PDF-Auto-BookMark 是一个自动为PDF文件添加书签的工具。通过结合AI视觉识别能力，可以快速准确地为没有书签的PDF文档生成完整的书签目录，极大提升阅读体验。
 
+> **注意**: 本项目目前处于规划阶段，Python脚本和依赖文件将在后续版本中提供。本README描述了完整的工作流程和使用方法。
+
 ## 功能特点
 
 - 🤖 利用AI视觉识别技术自动识别PDF目录结构
@@ -47,8 +49,7 @@ cd PDF-Auto-BookMark
 
 2. 安装依赖：
 ```bash
-pip install -r requirements.txt
-# 如果没有 requirements.txt，手动安装依赖
+# 手动安装依赖（requirements.txt 将在后续版本提供）
 pip install pikepdf PyPDF2
 ```
 
@@ -111,6 +112,8 @@ pip install pikepdf PyPDF2
 - 以此类推
 
 ### 第四步：运行Python脚本添加书签
+
+> **注意**: `add_bookmark.py` 脚本将在后续版本中提供，以下为预期的使用方式。
 
 ```bash
 python add_bookmark.py <PDF文件路径> <目录文本文件路径> [输出PDF文件路径]
