@@ -23,7 +23,12 @@
 import re
 import sys
 import os
+from math import gcd
+from functools import reduce
 from PyPDF2 import PdfReader, PdfWriter
+
+# 常量: Tab 转换为多少个空格
+TAB_SIZE = 4
 
 def add_bookmarks(pdf_path, toc_path, output_path, page_offset):
     """
@@ -79,7 +84,7 @@ def add_bookmarks(pdf_path, toc_path, output_path, page_offset):
     # 检测缩进单位
     indent_sizes = []
     for raw_line in lines:
-        expanded = raw_line.expandtabs(4)  # 将Tab转换为4个空格
+        expanded = raw_line.expandtabs(TAB_SIZE)  # 将Tab转换为空格
         stripped = expanded.lstrip()
         if not stripped.strip():
             continue
@@ -87,8 +92,11 @@ def add_bookmarks(pdf_path, toc_path, output_path, page_offset):
         if indent_size > 0:
             indent_sizes.append(indent_size)
 
-    # 使用最小缩进作为单位，如果没有检测到则使用默认值4
-    indent_unit = min(indent_sizes) if indent_sizes else 4
+    # 使用最大公约数 (GCD) 来检测缩进单位，如果没有检测到则使用默认值4
+    if indent_sizes:
+        indent_unit = reduce(gcd, indent_sizes)
+    else:
+        indent_unit = 4
     print(f"检测到的缩进单位: {indent_unit} 个空格")
 
     line_num = 0
@@ -99,7 +107,7 @@ def add_bookmarks(pdf_path, toc_path, output_path, page_offset):
             continue
 
         # 1. 计算缩进级别
-        expanded = line.expandtabs(4)  # 将Tab转换为4个空格
+        expanded = line.expandtabs(TAB_SIZE)  # 将Tab转换为空格
         indent_size = len(expanded) - len(expanded.lstrip())
         level = indent_size // indent_unit
 
@@ -121,7 +129,7 @@ def add_bookmarks(pdf_path, toc_path, output_path, page_offset):
         
         # 验证页码是否在有效范围内
         if dest_page_index < 0 or dest_page_index >= total_pages:
-            print(f"警告: 第 {line_num} 行的页码 {page_num_str} (偏移后为 {dest_page_index + 1}) 超出PDF页码范围 (1-{total_pages})，已跳过")
+            print(f"警告: 第 {line_num} 行的页码 {page_num_str} 经偏移计算后得到的页面索引 {dest_page_index} 超出有效范围 [0, {total_pages-1}]，已跳过")
             continue
 
         # 4. 查找父节点
