@@ -86,15 +86,18 @@ def add_bookmarks(pdf_path, toc_path, output_path, page_offset):
     for raw_line in lines:
         expanded = raw_line.expandtabs(TAB_SIZE)  # 将Tab转换为空格
         stripped = expanded.lstrip()
-        if not stripped.strip():
+        if not stripped:
             continue
         indent_size = len(expanded) - len(stripped)
         if indent_size > 0:
             indent_sizes.append(indent_size)
 
-    # 使用最大公约数 (GCD) 来检测缩进单位，如果没有检测到则使用默认值4
+    # 使用最大公约数 (GCD) 来检测缩进单位，如果没有检测到或GCD太小则使用默认值4
     if indent_sizes:
         indent_unit = reduce(gcd, indent_sizes)
+        # 如果GCD为1，则可能是混合缩进或不规则缩进，使用最小缩进作为单位
+        if indent_unit == 1:
+            indent_unit = min(indent_sizes)
     else:
         indent_unit = 4
     print(f"检测到的缩进单位: {indent_unit} 个空格")
@@ -103,7 +106,8 @@ def add_bookmarks(pdf_path, toc_path, output_path, page_offset):
     for line in lines:
         line_num += 1
         line = line.rstrip()
-        if not line.strip():
+        stripped_line = line.strip()
+        if not stripped_line:
             continue
 
         # 1. 计算缩进级别
@@ -112,11 +116,10 @@ def add_bookmarks(pdf_path, toc_path, output_path, page_offset):
         level = indent_size // indent_unit
 
         # 2. 提取标题和页码
-        content = line.strip()
-        match = re.search(r'^(.*)\s+(\d+)$', content)
+        match = re.search(r'^(.*)\s+(\d+)$', stripped_line)
         
         if not match:
-            print(f"警告: 第 {line_num} 行格式不正确，已跳过: {line.strip()}")
+            print(f"警告: 第 {line_num} 行格式不正确，已跳过: {stripped_line}")
             continue
             
         title = match.group(1).strip()
